@@ -1,0 +1,101 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>join page</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    
+    <link rel="stylesheet" type='text/css' href="{% static 'style.css' %}">
+</head>
+<body>
+    <!-- Always shows a header, even in smaller screens. -->
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+      <header class="mdl-layout__header mdl-layout__header--scroll mdl-color--primary">
+        <div class="mdl-layout mdl-layout__header-row">
+          <h3>회원가입</h3>
+        </div>
+      </header>
+      <main class="mdl-layout__content">
+        <div class="flex-container column">
+            <div class="flex-item">
+                <label>아이디: <input id="id" type="text"></label>
+            </div>
+            <div class="flex-item">
+                <label>비밀번호: <input id="pw" type="password"></label>
+            </div>
+            <div class="flex-item">
+                <label>비밀번호 확인: <input id="r_pw" type="password"></label>
+            </div>
+            <div class="flex-item">
+                <label>이름: <input id="name" type="text"></label>
+            </div>
+            <div class="flex-item">
+                <input type="button" value="뒤로가기" onclick="back();">
+                <input type="button" value="계정 생성" onclick="create_id();">
+            </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+        function back() {
+            window.history.back();
+        }
+
+        function create_id() {
+        var id = document.getElementById("id").value;
+        var pw = document.getElementById("pw").value;
+        var r_pw = document.getElementById("r_pw").value;
+        var name = document.getElementById("name").value;
+
+        // CSRF 토큰 가져오기
+        var csrftoken = getCookie('csrftoken');
+
+        var formData = new FormData();
+        formData.append('id', id);
+        formData.append('pw', pw);
+        formData.append('name', name);
+
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                var response = JSON.parse(this.responseText);
+                if (response.success) {
+                    alert("계정이 생성되었습니다. 로그인 페이지로 이동합니다.");
+                    window.location.href = "/login/";
+                } else {
+                    alert("계정 생성에 실패했습니다. 다시 시도해주세요.");
+                }
+            }
+        };
+        xhr.open("POST", "{% url 'polls:join' %}", true);
+
+        // CSRF 토큰을 헤더
+        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        xhr.send(formData);
+    }
+
+    // CSRF 토큰을 쿠키에서 가져오는 함수
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // 쿠키의 이름이 일치하는 경우
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+</body>
+</html>
