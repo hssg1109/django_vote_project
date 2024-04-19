@@ -22,80 +22,42 @@
       </header>
       <main class="mdl-layout__content">
         <div class="flex-container column">
+          <form action="{%url 'polls:join'%}" method="post">
+            {% csrf_token %}
             <div class="flex-item">
-                <label>아이디: <input id="id" type="text"></label>
+              <label>아이디: <input name="id" type="text"></label>
             </div>
             <div class="flex-item">
-                <label>비밀번호: <input id="pw" type="password"></label>
+              <label>비밀번호: <input name="pw" type="password"></label>
             </div>
             <div class="flex-item">
-                <label>비밀번호 확인: <input id="r_pw" type="password"></label>
+              <label>비밀번호 확인: <input name="r_pw" type="password"></label>
             </div>
             <div class="flex-item">
-                <label>이름: <input id="name" type="text"></label>
+              <label>이름: <input name="name" type="text"></label>
             </div>
-            <div class="flex-item">
-                <input type="button" value="뒤로가기" onclick="back();">
-                <input type="button" value="계정 생성" onclick="create_id();">
+            {% if error %}
+            <div>
+              <p> {{ error }}</p>
             </div>
+            {% endif %}
+            <div class="flex-container">
+              <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" style="margin-right: 16px;">계정 생성</button>
+              <a type=button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect"
+               href="{% url 'polls:login' %}">
+                뒤로 가기
+              </a>
+            </div>
+          </form>
+          </div>
         </div>
       </main>
     </div>
-
     <script>
-        function back() {
+      function back() {
             window.history.back();
-        }
-
-        function create_id() {
-        var id = document.getElementById("id").value;
-        var pw = document.getElementById("pw").value;
-        var r_pw = document.getElementById("r_pw").value;
-        var name = document.getElementById("name").value;
-
-        // CSRF 토큰 가져오기
-        var csrftoken = getCookie('csrftoken');
-
-        var formData = new FormData();
-        formData.append('id', id);
-        formData.append('pw', pw);
-        formData.append('name', name);
-
-        var xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-                var response = JSON.parse(this.responseText);
-                if (response.success) {
-                    alert("계정이 생성되었습니다. 로그인 페이지로 이동합니다.");
-                    window.location.href = "/login/";
-                } else {
-                    alert("계정 생성에 실패했습니다. 다시 시도해주세요.");
-                }
-            }
-        };
-        xhr.open("POST", "{% url 'polls:join' %}", true);
-
-        // CSRF 토큰을 헤더
-        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        xhr.send(formData);
-    }
-
-    // CSRF 토큰을 쿠키에서 가져오는 함수
-    function getCookie(name) {
-        var cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = cookies[i].trim();
-                // 쿠키의 이름이 일치하는 경우
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
+      }
     </script>
+
 </body>
 </html>

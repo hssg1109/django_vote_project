@@ -41,8 +41,8 @@
       <div class="mdl-layout-spacer"></div>
       <!-- Navigation. We hide it in small screens. -->
       <nav class="mdl-navigation">
-        <a class="mdl-navigation__link" href="login.html">로그아웃</a>
-        <a class="mdl-navigation__link" href="home.html">홈으로</a>
+        <a class="mdl-navigation__link" href="{% url 'polls:login' %}">로그아웃</a>
+        <a class="mdl-navigation__link" href="{% url 'polls:home' %}">홈으로</a>
       </nav>
     </div>
     <div class="mdl-layout mdl-layout__header-row">
@@ -51,198 +51,192 @@
   </header>
   <main class="mdl-layout__content">
     <div id=wrapper class="page-content">
-      <div style="width:400px; display:grid; align-content: center; text-align: center; padding:12px">
-        <form action="#" style="border-bottom: 1px black solid;">
-          <div class="mdl-textfield mdl-js-textfield">
-            <textarea class="mdl-textfield__input" style="border:2px solid gray;" type="text" rows= "3" maxrows="6" id="question-field" ></textarea>
-            <label class="mdl-textfield__label" for="question-field">질문을 입력해주세요.</label>
-          </div>
-        </form>
-        <div style="display: grid; justify-content: center; margin-bottom: 24px;" >
-          <div class="answer">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input id="radio_b" type="radio" />
+      {% if messages %}
+      <ul class="messages">
+          {% for message in messages %}
+          <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+          {% endfor %}
+      </ul>
+      {% endif %}
+      {% if error %}
+      <div>
+        <h4 style="margin-left: 12px; margin-bottom: 0; color:red"> {{ error }}</h4>
+      </div>
+      {% endif %}
+      <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div style="width:400px; display:grid; align-content: center; text-align: center; padding:12px">
+          <div action="#" style="border-bottom: 1px black solid;">
+            <div class="mdl-textfield mdl-js-textfield">
+              <textarea required class="mdl-textfield__input" style="border:2px solid gray;" type="text" rows= "3" maxrows="6" name="question-field" ></textarea>
+              <label class="mdl-textfield__label" for="question-field">질문을 입력해주세요.</label>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q1">
-                <label class="mdl-textfield__label" for="q1">선택지 내용을 입력해주세요.</label>
-              </div>
-            </form>
           </div>
-          <div class="answer">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input id="radio_b" type="radio" />
+          <div style="display: grid; justify-content: center; margin-bottom: 24px;" >
+            <div class="answer">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input id="radio_b" type="radio" />
+              </div>
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="1" name="1">
+                  <label class="mdl-textfield__label" for="1">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q2">
-                <label class="mdl-textfield__label" for="q2">선택지 내용을 입력해주세요.</label>
+            <div class="answer">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input id="radio_b" type="radio" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="2" name="2">
+                  <label class="mdl-textfield__label" for="2">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q3">
-                <label class="mdl-textfield__label" for="q3">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="3" name="x">
+                  <label class="mdl-textfield__label" for="3">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q4">
-                <label class="mdl-textfield__label" for="q4">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="4"  name="x">
+                  <label class="mdl-textfield__label" for="4">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q5">
-                <label class="mdl-textfield__label" for="q5">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="5"  name="x">
+                  <label class="mdl-textfield__label" for="5">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q6">
-                <label class="mdl-textfield__label" for="q6">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="6"  name="x">
+                  <label class="mdl-textfield__label" for="6">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q7">
-                <label class="mdl-textfield__label" for="q7">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="7"  name="x">
+                  <label class="mdl-textfield__label" for="7">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q8">
-                <label class="mdl-textfield__label" for="q8">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="8"  name="x">
+                  <label class="mdl-textfield__label" for="8">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q9">
-                <label class="mdl-textfield__label" for="q9">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="9"  name="x">
+                  <label class="mdl-textfield__label" for="9">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q10">
-                <label class="mdl-textfield__label" for="q10">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="10"  name="x">
+                  <label class="mdl-textfield__label" for="10">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q11">
-                <label class="mdl-textfield__label" for="q11">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
-          </div>
-          <div class="answer_hide">
-            <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
-              <input type="radio" id="radio_b" />
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="11"  name="x">
+                  <label class="mdl-textfield__label" for="11">선택지 내용을 입력해주세요.</label>
+              </div>
             </div>
-            <form action="#">
-              <div class="mdl-textfield mdl-js-textfield">
-                <input style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="q12">
-                <label class="mdl-textfield__label" for="q12">선택지 내용을 입력해주세요.</label>
+            <div class="answer_hide">
+              <div style="display: flex; justify-content: center; align-items: center; margin-right:10px;">
+                <input type="radio" id="radio_b" />
               </div>
-            </form>
+              <div class="mdl-textfield mdl-js-textfield">
+                  <input  style="border:2px solid gray;" class="mdl-textfield__input" type="text" id="12"  name="x">
+                  <label class="mdl-textfield__label" for="12">선택지 내용을 입력해주세요.</label>
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div style="display: flex; justify-content: center;">
-          <button onclick='add_question()' class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-            선택지 추가
-          </button>
-          <button onclick='del_question()' style="margin-left:24px" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
-            선택지 제거
-          </button>
-        </div>
-        
-        <div style="margin-top: 30px; width: 360px; border: 1px solid gray; ">
-            <label for="file"> 투표 참고 파일 업로드(이미지):
-              <form>   
-                <input style="margin-left: 12px;" type = "file" name = "fileupload" accept = "image/*" />
-              </form>
+          
+          <div style="display: flex; justify-content: center;">
+            <a type=button onclick='add_question()' class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              선택지 추가
+            </a>
+            <a type=button onclick='del_question()' style="margin-left:24px" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+              선택지 제거
+          </a>
+          </div>
+
+          <div style="margin-top: 30px; width: 360px; border: 1px solid gray; ">
+              <label for="file"> 투표 참고 파일 업로드(이미지):
+                <form>   
+                  <input id= file style="margin-left: 12px;" type = "file" name = "file" accept = "image/*" />
+                </form>
+              </label>
+          </div>
+  
+          <div style="margin-top: 24px;">
+            <label for="date"> 투표 기한 설정:
+              <input type="date"
+                     id="currentDate"
+                     name="date"
+                     max=""
+                     min=""
+                        />
             </label>
-        </div>
+          </div>
+  
+          <div style="margin-top: 24px; display: flex; justify-content: center; ">
+            <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
+              <input type="radio" id="option-1" class="mdl-radio__button" name="options" value="1" checked>
+              <span class="mdl-radio__label">익명 투표</span>
+            </label>
+            <label style="margin-left:12px"class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
+              <input type="radio"  id="option-2" class="mdl-radio__button" name="options" value="2">
+              <span class="mdl-radio__label">기명 투표</span>
+            </label>
+          </div>
+  
+          <div style="margin-top: 24px;">
+            <button type="sumbmit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+              투표 생성
+            </button>
+          </div>
 
-        <div style="margin-top: 24px;">
-          <label for="date"> 투표 기한 설정:
-            <input type="date"
-                   id="date"
-                   max=""
-                   min=""
-                   value="2024-04-12"  />
-          </label>
-        </div>
-
-        <div style="margin-top: 24px; display: flex; justify-content: center; ">
-          <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-1">
-            <input type="radio" id="option-1" class="mdl-radio__button" name="options" value="1" checked>
-            <span class="mdl-radio__label">익명 투표</span>
-          </label>
-          <label style="margin-left:12px"class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="option-2">
-            <input type="radio"  id="option-2" class="mdl-radio__button" name="options" value="2">
-            <span class="mdl-radio__label">기명 투표</span>
-          </label>
-        </div>
-
-        <div style="margin-top: 24px;">
-          <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" 
-          onclick="location.href='poll_create.html'">
-            투표 생성
-          </button>
-        </div>
-
-      </div>      
+        </div>      
+      </form>
+      
     </div>
   </main>
 </div>
 <script>
+  document.getElementById('currentDate').value = new Date().toISOString().substring(0, 10);;
+
   function add_question() {
       var element = document.getElementsByClassName('answer_hide');
       answer_count = document.getElementsByClassName('answer');
@@ -253,8 +247,11 @@
       else{
           element[0].className = 'answer'
       }
+      var ele = document.getElementById(len+1);
+      ele.setAttribute('name',len+1)
+      ele.setAttribute('required','True')
 
-      }   
+    }  
 
   function del_question() {
       var element = document.getElementsByClassName('answer');
@@ -265,6 +262,9 @@
       else{
           element[len-1].className = 'answer_hide'
       }
+      var ele = document.getElementById(len);
+      ele.setAttribute('name','x')
+      ele.removeAttribute('required')
       }   
 </script>
 

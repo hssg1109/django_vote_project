@@ -24,14 +24,29 @@
         <div class="flex-container column">
           <form method="post">
             {% csrf_token %}
-            {{ form.as_p }}
             <div class="flex-item">
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" type="submit">로그인</button>
+              <label>아이디: <input name="id" type="text"></label>
             </div>
-          </form>
-          <div class="flex-item">
-              <a href="{% url 'polls:join' %}"><button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">회원가입</button></a>
-          </div>
+            <div class="flex-item">
+              <label>비밀번호: <input name="pw" type="password"></label>
+            </div>
+            {% if error %}
+            <div>
+              <p> {{ error }}</p>
+            </div>
+            {% endif %}
+            <div class="flex-container">
+              <div class="flex-item">
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" type="submit">로그인</button>
+              </div>
+            </div>
+          </form>    
+              <div class="flex-item">
+                <a href="{% url 'polls:join' %}"><button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">회원가입</button></a>
+              </div>
+
+          
+
         </div>
       </main>
     </div>

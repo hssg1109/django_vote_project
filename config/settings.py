@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 import os
 from pathlib import Path
+from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,6 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'polls.app.PollsConfig',
+    'rest_framework',
+    'polls_api',
 ]
 
 MIDDLEWARE = [
@@ -79,10 +82,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default' : {
         'ENGINE': 'django.db.backends.mysql',    
-        'NAME': 'team1',                     
-        'USER': 'admin',                          
-        'PASSWORD': 'password',                 
-        'HOST': 'team1-database.cz2ma06ok3a2.ap-northeast-2.rds.amazonaws.com',                    
+        'NAME': 'testdb',                     
+        'USER': 'root',                          
+        'PASSWORD': 'p@ssw0rd',                 
+        'HOST': 'localhost',                    
         'PORT': '3306',                         
     }
 }
@@ -106,7 +109,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'auth.User'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -134,7 +137,8 @@ STATICFILES_DIRS = [
 
 #DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = 'home/'
+LOGIN_REDIRECT_URL = reverse_lazy('polls:home')
+LOGOUT_REDRIRECT_URL = reverse_lazy('polls:login')
 
 LOGIN_URL = '/login/'
 
@@ -142,3 +146,7 @@ MEDIA_URL = '/media/'
 # MEDIA_URL = 'http://static.myservice.com/media/' 다른 서버로 media 파일 복사시
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+AUTH_USER_MODEL = 'auth.user'
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.session.SessionStorage'

@@ -40,11 +40,17 @@
   </header>
   <main class="mdl-layout__content">
     <div id=wrapper class="page-content">
+      
       <div style="font-size: large; width:400px; display:grid; align-content: center; text-align: center; padding:12px">
+        {% if error_message %}
+        <div>
+          <h3 style="color:red"><strong>{{ error_message }}</strong></h3>
+        </div>
+        {% endif %}
         <div style="margin:10px; padding: 16px; border: 2px solid gray;">
         {{ poll.questionText }}
         </div>
-
+        
         <div style="display: grid; justify-content: flex-end;">
           {% if poll.secretPoll == True %}
             <p style="display:flex; justify-content: flex-end; margin-bottom: 2px;">
@@ -58,11 +64,11 @@
           <p><img style="width: 320px; height: 320px;" src="../../media/{{ poll.pollImage }}" alt=""></p>
         </div>
         <div style="margin-top: 2px; row-gap: 6px; display: grid; justify-content: flex-start; border: 2px solid gray; padding: 4px;">
-          <form action="" method="post">
+          <form action={% url 'polls:vote' poll.pollId %} method="post">
             {% csrf_token %}
-            {% for choice in choices %}
-              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="{{ choice.choiceId }}">
-                <input type="radio" id="{{ choice.choiceId }}" class="mdl-radio__button" name="options" value="{{ choice.choiceId }}">
+            {% for choice in poll.choice.all %}
+              <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" for="choice{{ forloop.counter }}">
+                <input type="radio" id="choice{{ forloop.counter }}" class="mdl-radio__button" name="choice" value="{{ choice.choiceId }}">
                 <span class="mdl-radio__label">{{ choice.choiceText }}</span>
               </label>
               <p></p>

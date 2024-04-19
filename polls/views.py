@@ -1,124 +1,142 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import JsonResponse
+from datetime import date, datetime
 
-from django.contrib.auth.views import LoginView
-from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login as auth_login
 from django.contrib.auth import logout as auth_logout
-from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.decorators import login_required
-import datetime
+
 from django.http import HttpResponseRedirect
-from django.http import JsonResponse
-import json
-from django.db.utils import OperationalError
+from django.db.utils import IntegrityError
 
-from .models import Poll,Choice
-
+from .models import Poll,Choice,Vote
+from django.contrib.auth.models import User
+from django.urls import reverse
+from django.db.models import F
+from django.contrib import messages
+from .form import *
 
 def index(request):
     return render(request, 'login.html')
 
-
 def home(request):
     poll_list = Poll.objects.all()
-    return render(request, 'home.html', {'poll_list': poll_list}) 
-
-def poll_detail(request, pollnum):
-    poll = get_object_or_404(Poll, pk=pollnum)
-    choices = Choice.objects.filter(pollId=pollnum)
-    context={'poll':poll,'choices':choices}
-    return render(request,'poll_detail.html',context)
-
-def get_vote(request, votenum):
     
-    return 0
+    for poll in poll_list:
+        count = 0
+        for choice in poll.choice.all():
+            count+=choice.count
+        poll.total = count
+        poll.save()
 
-def poll_result(request):
-    poll= 0
+    context={'poll_list': poll_list}
+    return render(request, 'home.html', context) 
+
+def custom_login(request):
+    if request.method == 'POST':
+        id = request.POST['id']
+        pw = request.POST['pw']
+        user = authenticate(request, username=id, password=pw)
+        if user is not None:
+            auth_login(request,user)
+            return redirect('polls:home')
+        else:
+            return render(request,'login.html', {'error': '아이디 비밀번호를 확인해주세요.'})
+    else:
+        return render(request,'login.html')   
+
+def custom_logout(request):
+    auth_logout(request)
+    return redirect('polls:index')
 
 def join(request):
     if request.method == 'POST':
-        id = request.POST.get('id')
-        pw = request.POST.get('pw')
-        name = request.POST.get('name')
-
-        # 사용자 이름이 이미 존재하는지 확인
+        id = request.POST["id"]
+        pw = request.POST["pw"]
+        r_pw = request.POST["r_pw"]
+        name = request.POST["name"]
         if User.objects.filter(username=id).exists():
-            return JsonResponse({'success': False, 'message': '이미 사용 중인 아이디입니다.'})
-
-        # 사용자 생성
-        user = User.objects.create_user(username=id, password=pw, first_name=name)
-
-        if user:
-            return JsonResponse({'success': True})
+            return render(request,'join.html', {'error': '이미 있는 아이디입니다.'})
+        elif pw != r_pw:
+            return render(request,'join.html', {'error': '패스워드가 일치하지 않습니다.'})
+        elif User.objects.filter(first_name=name).exists():
+            return render(request,'join.html', {'error': '이미 있는 이름입니다.'})
+        
+        try:
+            User.objects.create_user(username=id, password=pw, first_name=name)
+        except ValueError:
+            return render(request,'join.html', {'error': '빈 필드가 있습니다.'})
         else:
-            return JsonResponse({'success': False, 'message': '계정 생성에 실패했습니다. 다시 시도해주세요.'})
+            return redirect('polls:index')
+
+
+           
+    return render(request,'join.html')
+
+
+def poll_detail(request, pollnum):
+    poll = get_object_or_404(Poll, pk=pollnum)
+    if poll.expireDate < date.today():
+        messages.warning(request, '투표기한이 만료되었습니다. 결과보기를 눌러주세요')
+        return redirect('polls:home')
+
+    if Vote.objects.filter(poll=poll,voter=request.user).exists():
+        messages.warning(request, '이미 투표하셨습니다. 다른투표를 선택해주세요')
+        return redirect('polls:home')
+    context={'poll':poll}
+    return render(request,'poll_detail.html',context)
+
+def vote(request, pollnum):
+    poll = get_object_or_404(Poll, pk=pollnum)
+    try:
+        selected_choice = poll.choice.get(pk=request.POST['choice'])
+    except (KeyError, Choice.DoesNotExist):
+        return render(request, 'poll_detail.html', {'poll':poll, 'error_message' : '항목 선택 후 투표하세요!'})
     else:
-        return render(request, 'join.html')    
+        Vote.objects.create(poll=poll,choice=selected_choice,voter=request.user)
+        selected_choice.count = F('count') + 1
+        selected_choice.save()
+        return HttpResponseRedirect(reverse('polls:home'))
 
-
+def poll_result(request, pollnum):
+    poll = get_object_or_404(Poll, pk=pollnum)
+    context={'poll':poll}
+    return render(request,'poll_result.html',context)
 
 @login_required
 def poll_create(request):
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body.decode('utf-8'))
-            question = data.get('question')
-            choices = data.get('choices', [])
-            deadline = data.get('deadline')
+        questionText = request.POST.get('question-field')
+        pollImage = request.FILES.get('file')
+        expireDate = request.POST.get('date')
+        secretPoll = True
+        if request.POST.get('options')=='2':
+            secretPoll = False
 
-            try:
-                deadline = datetime.datetime.strptime(deadline, '%Y-%m-%d').date()
-            except ValueError:
-                error_message = '올바른 날짜 형식이 아닙니다.'
-                return JsonResponse({'success': False, 'message': error_message})
+        if datetime.strptime(expireDate,"%Y-%m-%d") < datetime.now():
+            return render(request,'poll_create.html', {'error': '투표 만료일을 오늘보다 더 늦게 설정하세요.'})
+        choice_count = 0 
+        for i in range(12):
+            if request.POST.get("{}".format(i+1)) == None:
+              break
+            else:
+                choice_count+=1
 
-            poll = Poll.objects.create(title=question, deadline=deadline)
+        poll = Poll.objects.create(userId=request.user,
+                        questionText=questionText,
+                        pollImage=pollImage,
+                        expireDate=expireDate,
+                        secretPoll=secretPoll)
 
-            for choice_text in choices:
-                poll.choice_set.create(choice_text=choice_text)
+        for i in range(choice_count):
+            poll.choice.create(choiceText=request.POST.get("{}".format(i+1)))
 
-            return JsonResponse({'success': True})
-        except OperationalError as e:
-            return redirect('polls:home')  # 오류 발생 시 홈 페이지로 이동
-        except Exception as e:
-            return JsonResponse({'success': False, 'message': '투표 생성 중 오류가 발생했습니다.'})
+        return redirect('polls:home')
     else:
-        return render(request, 'poll_create.html')
-    
+        return render(request, 'poll_create.html') 
+
+
+
+                                    
 
 
     
-def login(request):
-    if request.method == 'POST':
-        username = request.POST.get('id')
-        password = request.POST.get('pw')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            auth_login(request, user)
-            return redirect('polls:home')
-        else:
-            error_message = "아이디 또는 비밀번호를 확인해주세요."
-            return render(request, 'login.html', {'error_message': error_message})
-    return LoginView.as_view(template_name='login.html')(request)
-
-def custom_logout(request):
-    auth_logout(request)
-    return redirect('polls:home')
-
-
-def custom_login(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, request.POST)
-        if form.is_valid():
-            auth_login(request, form.get_user())
-            return HttpResponseRedirect(request.GET.get('next', '/home/'))
-    else:
-        form = AuthenticationForm()
-    return render(request, 'login.html', {'form': form})
-
-def poll_delete(request, poll_id):
-    poll = get_object_or_404(Poll, pk=poll_id)
-    poll.delete()
-    return JsonResponse({'success': True})

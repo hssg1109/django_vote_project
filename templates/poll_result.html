@@ -21,9 +21,54 @@
         display: none;
       }
 
-      span{
-        margin-bottom: 0px;
-        font-size: medium;
+      * {
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
+        }
+
+      #btnWrap {
+        width: 500px;
+        margin: 100px auto;
+      }
+
+      #popupBtn {
+        width: 150px;
+        height: 50px;
+        padding: 10px 5px;
+        background-color: #007bff;
+        color: #fff; /* 텍스트 색상을 지정하세요 */
+        border: none; /* 테두리 제거 */
+        cursor: pointer;
+      }
+      #modalWrap {
+        position: fixed; /* 화면에 고정 */
+        z-index: 1; /* 상위에 위치 */
+        padding-top: 100px;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.7); /* 반투명한 배경색 */
+        display: none; /* 초기에는 숨김 */
+      }
+
+      #modalBody {
+        width: 500px;
+        height: 1200px;
+        padding: 30px 30px;
+        margin: 0 auto;
+        border: 1px solid #777;
+        background-color: #fff;
+      }
+
+      #closeBtn {
+        float: right;
+        font-weight: bold;
+        color: #777;
+        font-size: 25px;
+        cursor: pointer;
       }
     </style>
 </head>
@@ -37,8 +82,8 @@
       <div class="mdl-layout-spacer"></div>
       <!-- Navigation. We hide it in small screens. -->
       <nav class="mdl-navigation">
-        <a class="mdl-navigation__link" href="login.html">로그아웃</a>
-        <a class="mdl-navigation__link" href="home.html">홈으로</a>
+        <a class="mdl-navigation__link" href="{% url 'polls:login' %}">로그아웃</a>
+        <a class="mdl-navigation__link" href="{% url 'polls:home' %}">홈으로</a>
       </nav>
     </div>
     <div class="mdl-layout mdl-layout__header-row">
@@ -49,44 +94,85 @@
     <div id=wrapper class="page-content">
       <div style="width:400px; display:grid; align-content: center; text-align: center; padding:12px">
         <div style="font-size: large; margin:10px; padding: 16px; border: 2px solid gray;">
-        복숭아<br>물복 vs 딱복
+          {{ poll.questionText }}
         </div>
 
         <div id="inline-text" style="display: grid; justify-content: flex-end;">
-          <p style="display:flex; justify-content: flex-end; margin-bottom: 2px;">익명 투표 입니다.</p>
-          <p style="display:flex; justify-content: flex-end; margin-bottom: 2px;">투표기한: 24.4.12 ~ 24.4.20</p>
+          <p style="display:flex; justify-content: flex-end; margin-bottom: 2px;">
+            {% if poll.secretPoll == True %}
+              <a style="display:flex; justify-content: flex-end; margin-bottom: 2px;">
+              익명 투표 입니다.</a>
+            {% else %}
+              <a style="display:flex; justify-content: flex-end; margin-bottom: 2px;">
+              기명 투표 입니다.</a>
+            {% endif %}
+          </p>
+          <button id= "secret-vote" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+            참여자 보기</button>
+          <div id="modalWrap"> <!-- 모달 창을 감싸는 div -->
+            <div id="modalBody">
+              <span id="closeBtn">&times;</span> <!-- 모달을 닫는 X 버튼 -->
+              {% for choice in poll.choice.all %}
+                <h4>{{ choice.choiceText }} 투표자 / {{ choice.count }}명:</h4>
+                {% for vote in choice.vote.all %}
+                  <p>{{ forloop.counter }} - {{ vote.voter.first_name }}</p> <!-- 모달 창 내용 -->
+                {% endfor %}
+                <br>
+              {% endfor %}  
+            </div>
+          </div>
+
+          <p style="display:flex; justify-content: flex-end; margin-bottom: 2px;">
+            투표기한: ~ {{ poll.expireDate }}</p>
         </div>
 
         <div style="display:flex;margin-top: 2px;"></div>
           <div style="row-gap: 6px; display: grid; justify-content: flex-start; border: 2px solid gray; padding: 4px;">
-            <div style="display: flex; column-gap: 5px; justify-content: space-between;">
-              <span class="question">물복 :</span>
-              <span class="count">10명</span> 
-              <button id="secret-vote">참여자 보기</button>
-            </div>
-            <div style="display: flex; column-gap: 5px; justify-content: space-between;">
-              <span class="question">딱복 :</span>
-              <span class="count">3명</span> 
-              <button id="secret-vote">참여자 보기</button>
-            </div>
-            <div style="display: flex; column-gap: 5px; justify-content: space-between;">
-              <span class="question">못골라 :</span>
-              <span class="count">23명</span> 
-              <button id="secret-vote">참여자 보기</button>
-            </div>
+            {% for choice in poll.choice.all %}
+              <div style="display: flex; column-gap: 5px; justify-content: space-between;">
+                <span class="question">{{ choice.choiceText }} :</span>
+                <span class="count"> {{ choice.count }}명 투표</span>           
+              </div>
+            {% endfor %}  
           </div>
-          <p>투표 참여자수: 36명</p>
+          <p>총 투표 참여자수: {{ poll.total }}</p>
 
         <div style="margin-top: 12px;">
-          <button onclick="location.href='home.html'" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect">
+          <a type=button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" href="{% url 'polls:home' %}">
             투표 목록으로
-          </button>
+          </a>
+            
         </div>
 
       </div>      
     </div>
   </main>
 </div>
+{% if poll.secretPoll == False %}
+  <script>
+    var elements = document.getElementById('secret-vote');
+    elements.setAttribute('id','show')
+  </script>
+{% endif %}
+ <script>
+  const btn = document.getElementById ("show"); // 모달을 띄우는 버튼 요소 가져오기
+  const modal = document.getElementById("modalWrap"); // 모달 창 요소 가져오기
+  const closeBtn = document.getElementById("closeBtn"); // 모달을 닫는 버튼(X) 요소 가져오기
 
+  btn.onclick = function () {
+    modal.style.display = "block"; // 버튼을 클릭하면 모달을 보이게 함
+  };
+
+  closeBtn.onclick = function () {
+    modal.style.display = "none"; // 모달을 닫는 버튼(X)을 클릭하면 모달을 숨김
+  };
+
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none"; // 모달 외부를 클릭하면 모달을 숨김
+    }
+  };
+
+</script>
 </body>
 </html>
