@@ -246,10 +246,11 @@
       }
       else{
           element[0].className = 'answer'
+          var ele = document.getElementById(len+1);
+          ele.setAttribute('name',len+1)
+          ele.setAttribute('required','True')
       }
-      var ele = document.getElementById(len+1);
-      ele.setAttribute('name',len+1)
-      ele.setAttribute('required','True')
+
 
     }  
 
@@ -261,10 +262,11 @@
       }
       else{
           element[len-1].className = 'answer_hide'
+          var ele = document.getElementById(len);
+          ele.setAttribute('name','x')
+          ele.removeAttribute('required')
       }
-      var ele = document.getElementById(len);
-      ele.setAttribute('name','x')
-      ele.removeAttribute('required')
+
       }   
 </script>
 
