@@ -105,26 +105,28 @@
             {% else %}
               <a style="display:flex; justify-content: flex-end; margin-bottom: 2px;">
               기명 투표 입니다.</a>
+              <button id= "secret-vote" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+                참여자 보기</button>
+              <div id="modalWrap"> <!-- 모달 창을 감싸는 div -->
+                <div id="modalBody">
+                  <span id="closeBtn">&times;</span> <!-- 모달을 닫는 X 버튼 -->
+                  {% for choice in poll.choice.all %}
+                    <h4>{{ choice.choiceText }} 투표자 / {{ choice.count }}명:</h4>
+                    {% for vote in choice.vote.all %}
+                      <p>{{ forloop.counter }} - {{ vote.voter.first_name }}</p> <!-- 모달 창 내용 -->
+                    {% endfor %}
+                    <br>
+                  {% endfor %}  
+                </div>
+              </div>
             {% endif %}
           </p>
-          <button id= "secret-vote" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-            참여자 보기</button>
-          <div id="modalWrap"> <!-- 모달 창을 감싸는 div -->
-            <div id="modalBody">
-              <span id="closeBtn">&times;</span> <!-- 모달을 닫는 X 버튼 -->
-              {% for choice in poll.choice.all %}
-                <h4>{{ choice.choiceText }} 투표자 / {{ choice.count }}명:</h4>
-                {% for vote in choice.vote.all %}
-                  <p>{{ forloop.counter }} - {{ vote.voter.first_name }}</p> <!-- 모달 창 내용 -->
-                {% endfor %}
-                <br>
-              {% endfor %}  
-            </div>
-          </div>
 
           <p style="display:flex; justify-content: flex-end; margin-bottom: 2px;">
             투표기한: ~ {{ poll.expireDate }}</p>
-        </div>
+          <div>
+            <p><img style="width: 320px; height: 320px;" src="../../media/{{ poll.pollImage }}" alt=""></p>
+          </div>
 
         <div style="display:flex;margin-top: 2px;"></div>
           <div style="row-gap: 6px; display: grid; justify-content: flex-start; border: 2px solid gray; padding: 4px;">
